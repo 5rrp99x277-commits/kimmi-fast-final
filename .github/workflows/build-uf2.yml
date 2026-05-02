@@ -1,0 +1,50 @@
+name: Build RP2040 CYW4373 Emulator UF2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-uf2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential python3 git
+
+      - name: Fetch Pico SDK
+        run: |
+          git clone --depth 1 https://github.com/raspberrypi/pico-sdk.git "$GITHUB_WORKSPACE/pico-sdk"
+          cd "$GITHUB_WORKSPACE/pico-sdk"
+          git submodule update --init --recursive
+
+      - name: Configure CMake
+        env:
+          PICO_SDK_PATH: ${{ github.workspace }}/pico-sdk
+        run: |
+          cmake -S . -B build -G Ninja -DPICO_BOARD=pico
+
+      - name: Build UF2
+        run: |
+          cmake --build build --verbose
+
+      - name: Show build outputs
+        run: |
+          find build -type f \( -name "*.uf2" -o -name "*.elf" -o -name "*.bin" -o -name "*.hex" \) -print
+
+      - name: Upload UF2 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyw4373_emulator_nohub_checked_v4_19_fixed_bcdc_debug_uf2
+          path: |
+            build/*.uf2
+            build/**/*.uf2
+          if-no-files-found: error
