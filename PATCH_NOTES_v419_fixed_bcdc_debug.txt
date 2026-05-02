@@ -1,0 +1,47 @@
+CYW4373 emulator v4.19 fixed + runtime BCDC debug patch
+
+Base:
+- User-provided cyw4373_v419_fixed.zip
+- Boot/reconnect/descriptors/WL_REG_ON timing are intentionally preserved.
+
+Changed only runtime BCDC control path in src/main.c:
+1. Added runtime_out_seq for tracing OUT->IN cycles.
+2. CONTROL_STAGE_DATA / CONTROL_STAGE_ACK now parse pending runtime BCDC OUT before the early non-SETUP return.
+3. parse_runtime_out() now returns bool.
+4. runtime_out_pending is cleared only when parse_runtime_out() succeeds.
+5. DATA stage gets first parse chance; ACK stage remains a second chance.
+6. BCDC IN setup performs last-chance parse before clearing ctrl_buf.
+7. All-zero BCDC header is rejected as not-ready, so cmd=0 is not accepted as a real request.
+8. Unsupported BCDC cmd is logged and left pending for the next stage.
+9. event_msgs returns deterministic 32 bytes of 0xFF.
+10. Added GET_VAR answers for mimo_bw_cap=0 and ampdu_ba_wsize=64.
+
+Not changed:
+- boot VID/PID 04b4:bd29
+- runtime VID/PID 04b4:0bdc
+- firmware bulk receive path
+- DL_GETSTATE/DL_GO logic
+- switch_to_runtime_reconnect()
+- endpoint order EP81 interrupt, EP82 bulk IN, EP02 bulk OUT
+- usb_descriptors.c contents from v419_fixed
+- tusb_config.h contents from v419_fixed
+
+Expected runtime UART trace:
+CTRL SETUP bm=0x21 bReq=0 wLen=272 boot=0 pending=1 seq=1
+CTRL DATA bm=0x21 bReq=0 wLen=272 boot=0 pending=1 seq=1
+parse_out: total=272 ...
+RUNTIME BCDC GET_VAR cur_etheraddr ...
+CTRL -> parse_runtime_out done at DATA
+RUNTIME BCDC IN: cmd=262 iovar='cur_etheraddr' resp_len=...
+
+If DATA is early/empty:
+CTRL -> parse_runtime_out not-ready at DATA
+CTRL ACK ...
+CTRL -> parse_runtime_out done at ACK
+
+v419-fixed-bcdc-debug-r2 review fixes:
+- Boot path is still unchanged versus cyw4373_v419_fixed.zip.
+- Do not reject unknown non-zero BCDC commands during parse; preserve cmd and ACK/noop in response.
+- cur_etheraddr/macaddr now return 8 bytes padded, not the host's 272-byte output-buffer length.
+- country returns 12 bytes, mpc/join_pref/mimo_bw_cap/ampdu_ba_wsize return fixed u32 values.
+- Unknown GET_VAR now returns a short OK response instead of a large zero-filled 272-byte payload.
