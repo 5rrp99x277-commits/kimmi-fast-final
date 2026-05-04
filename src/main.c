@@ -1075,7 +1075,7 @@ int main(void) {
     gpio_init(WL_REG_ON_PIN);
     gpio_set_dir(WL_REG_ON_PIN, GPIO_IN);
 
-    tud_init();
+    tusb_init();
 
     // Wait for Canon WL_REG_ON high. (Canon pin 1 -> RP2040 GPIO2).
     // If not connected, tie GPIO2 to 3.3V so the emulator starts on boot.
