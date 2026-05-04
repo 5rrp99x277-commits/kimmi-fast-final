@@ -20,7 +20,7 @@
 //--------------------------------------------------------------------
 #define STATUS_WS2812_PIN      16
 #define STATUS_GPIO_LED_PIN    25
-#define STATUS_LED_ENABLE      1
+#define STATUS_LED_ENABLE      0
 
 // 0 = wait forever. For bench test without Canon, tie GPIO2 to 3.3V.
 #define WL_REG_ON_WAIT_TIMEOUT_MS 0u
