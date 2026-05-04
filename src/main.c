@@ -60,7 +60,7 @@
 #define CYW4373_CHIP_ID                 0x00004373u
 #define CYW4373_CHIP_REV                0u
 #define CYW4373_RAM_SIZE                0x000C0000u
-#define CYW4373_EXPECTED_FW_SIZE        560000u
+#define CYW4373_EXPECTED_FW_SIZE        598311u
 #define CYW4373_FW_VERSION_STRING       "wl0: Aug 3 2022 20:30:47 version 13.10.246.286 (4b0a74a CY WLTEST) FWID 01-e73c9ff8"
 #define CYW4373_CLM_VERSION_STRING      "API: 18.1 Data: Murata.Type2AE Compiler: 1.35.0 ClmImport: 1.39.1 Customization: v3 23/02/09 Creation: 2023-02-09 04:01:47"
 #define CYW4373_EVENT_MSGS_FILL         0xFFu
